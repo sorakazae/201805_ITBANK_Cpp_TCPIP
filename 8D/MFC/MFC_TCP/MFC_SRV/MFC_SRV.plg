@@ -1,0 +1,22 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: MFC_SRV - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating command line "link.exe /nologo /subsystem:windows /incremental:yes /pdb:"Debug/MFC_SRV.pdb" /debug /machine:I386 /out:"Debug/MFC_SRV.exe" /pdbtype:sept  ".\Debug\MFC_SRV.obj" ".\Debug\MFC_SRVDlg.obj" ".\Debug\StdAfx.obj" ".\Debug\MFC_SRV.res" "
+<h3>Output Window</h3>
+Linking...
+Creating command line "bscmake.exe /nologo /o"Debug/MFC_SRV.bsc"  ".\Debug\StdAfx.sbr" ".\Debug\MFC_SRV.sbr" ".\Debug\MFC_SRVDlg.sbr""
+Creating browse info file...
+<h3>Output Window</h3>
+
+
+
+<h3>Results</h3>
+MFC_SRV.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

@@ -1,0 +1,39 @@
+#include <stdio.h>
+#include <string.h>
+
+struct score{
+	int kor;
+	int eng;
+	int math;
+};
+struct _name{
+	char name[20];
+};
+struct _addr{
+	char addr[50];
+};
+struct infor{
+	struct _name name;
+	struct _addr addr;
+	int age;
+};
+struct Student{
+	struct score s;
+	struct infor i;
+};
+int main(){
+	struct Student S;
+	
+	S.s.kor = 100;
+	S.s.eng = 80;
+	S.s.math = 60;
+
+	strcpy(S.i.addr.addr,"서울 성북구"); 
+	strcpy(S.i.name.name, 홍길동 님");
+	S.i.age = 20;
+
+	printf("%s %d살 %s 국어 :%d, 영어 : %d, 수학 : %d\n",
+			S.i.name.name, S.i.age, S.i.addr.addr, S.s.kor, S.s.eng, S.s.math);
+
+	return 0;
+}

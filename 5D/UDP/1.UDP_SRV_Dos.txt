@@ -1,0 +1,74 @@
+#pragma comment(lib, "ws2_32")
+#include <winsock2.h>
+#include <stdio.h>
+#include <time.h>
+
+typedef struct _data{
+	int attTime;
+	int attSize;
+	char attIP[16];
+}DATA, *PDATA;
+
+int main(int argc, char *argv[])
+{
+	WSADATA wsa;
+	if(WSAStartup(MAKEWORD(2, 2), &wsa) != 0)	
+		return -1;
+	
+	/*소켓 함수*/
+	SOCKET s;
+	s = socket(AF_INET, SOCK_DGRAM, 0);
+	if(s == INVALID_SOCKET)
+	{
+		printf("socket error!\n");
+		return -1;
+	}
+
+	/*주소 결합 bind함수*/
+	SOCKADDR_IN SrvAddr;
+	memset(&SrvAddr, 0, sizeof(SrvAddr));
+
+	SrvAddr.sin_addr.s_addr = inet_addr("192.168.11.10");
+	SrvAddr.sin_family = AF_INET;
+	SrvAddr.sin_port = htons(2222);
+
+	int errch=0;
+	errch = bind(s, (SOCKADDR*)&SrvAddr, sizeof(SrvAddr));
+	if(errch == SOCKET_ERROR)
+	{
+		printf("bind error!\n");
+		return -1;
+	}
+
+	/*데이터 수신*/
+	char buf[1024];
+	memset(buf, 0, sizeof(buf));
+	SOCKADDR_IN CltAddr;
+	int Cltlen = sizeof(CltAddr);
+	memset(&CltAddr, 0, Cltlen);
+
+	recvfrom(s, buf, sizeof(buf), 0, (SOCKADDR*)&CltAddr, &Cltlen);
+	printf("[%s:%d]\n", inet_ntoa(CltAddr.sin_addr), 
+		ntohs(CltAddr.sin_port));
+
+	/*데이터 송신*/
+	DATA dt;
+
+	printf("공격 시간 : ");
+	scanf("%d", &dt.attTime);
+	
+	printf("공격 데이터 크기 : ");
+	scanf("%d", &dt.attSize);
+
+	printf("공격 IP : ");
+	scanf("%s", dt.attIP);
+
+	sendto(s, (char*)&dt, sizeof(dt), 0, 
+		(SOCKADDR*)&CltAddr, sizeof(CltAddr));
+
+	/*소켓 종료 및 DLL 언로드*/
+	closesocket(s);
+	WSACleanup();
+
+	return 0;
+}

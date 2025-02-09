@@ -1,0 +1,36 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<time.h>
+int rand_(){
+		srand(time(NULL));
+		return rand() %99 +1;
+}
+void check(int ran){
+	int user=0,cnt=0;
+	while(1){
+		printf("input : ");
+		scanf("%d",&user);
+		system("pause");system("cls");
+		printf("com : %d\n",ran);
+		if(user >ran){
+			cnt++;
+			printf("==== UP ====\n");
+		}
+		else if(user<ran){
+			cnt++;
+			printf("==== DOWN ====\n");
+		}
+		else{
+			cnt++;
+			printf("%d¹ø Á¤´ä\n",cnt);
+			break;
+		}	
+	}
+}
+int main(){
+	printf("updown game start~!\n");
+	int ran = rand_();
+	check(ran);
+	printf("\n== !! Congratulations!! ==\n");
+	return 0;
+}

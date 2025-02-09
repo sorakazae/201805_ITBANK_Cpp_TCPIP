@@ -1,0 +1,22 @@
+#include <stdio.h>
+int main(int argc, char * argv[])
+{
+	char name[20];
+	int age;
+	char addr[20];
+	printf("당신의 이름 : ");
+	scanf("%s",name);
+	printf("%s 님 나이 : ",name);
+	scanf("%d",&age);
+	printf("%s 님 주소 : ",name);
+	scanf("%s",addr);
+	FILE * fp = fopen("c:\\test.text","w");
+	if(fp == NULL){
+		printf("파일을 열수 없습니다");
+		return -1;
+	}
+	fprintf(fp,"이름 : %s\n나이 : %d\n주소 : %s",
+		name,age,addr);
+	fclose(fp);
+	return 0;
+}

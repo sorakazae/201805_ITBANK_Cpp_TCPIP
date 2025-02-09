@@ -1,0 +1,34 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include<string.h>
+typedef struct st{
+	char name[20];
+	char addr[50];
+	int age;
+}ST;
+ST * func(){
+	ST * p = (ST*)malloc(sizeof(ST));
+	printf("이름 : ");
+	gets(p->name);
+	printf("주소 : ");
+	gets(p->addr);
+	printf("나이 : ");
+	scanf("%d",&p->age);
+	return p;
+}
+int main(int argc, char * argv[])
+{
+	ST * p;
+	p=func();
+	FILE * fp = fopen("c:\\test.txt","w");
+
+	fwrite(p->name,1,strlen(p->name),fp);
+	fprintf(fp,"\n");
+	fwrite(p->addr,1,strlen(p->addr),fp);
+	fprintf(fp,"\n%d\n",p->age);
+	
+	fclose(fp);
+	free(p);
+	
+	return 0;
+}

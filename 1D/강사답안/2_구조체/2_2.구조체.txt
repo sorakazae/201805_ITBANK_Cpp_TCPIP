@@ -1,0 +1,18 @@
+#include <stdio.h>
+#include<string.h>
+struct A{
+	int a;  //이공간에는 데이터 10을 대입
+	char a_str[20]; //이공간에는 문자열 "Hello"를 대입
+};
+struct B{
+	int b;  //이공간에는 데이터 20을 대입
+	char b_str[20];  //이공간에는 문자열 "world"를 대입
+	struct A a; 
+};
+int main(){
+	struct B b;
+	// hello world 10 20
+	b.b = 20;	strcpy(b.b_str,"world");	b.a.a =10; strcpy(b.a.a_str,"hello");
+	printf("%s %s %d %d \n",b.a.a_str,b.b_str,b.a.a,b.b);
+	return 0;
+}

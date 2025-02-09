@@ -1,0 +1,70 @@
+/*전처리기 구성*/
+#pragma comment(lib, "ws2_32.lib")
+#include <winsock2.h>
+#include <stdio.h>
+
+int main(){
+	/* dll 로드 */
+	WSADATA wsa;
+	WSAStartup(MAKEWORD(2,2), &wsa);
+
+	/*소켓 생성*/
+	SOCKET s;
+	s = socket(AF_INET, SOCK_DGRAM, 0);
+	if(s == INVALID_SOCKET){
+		printf("socket error!\n");
+		return -1;
+	}
+
+	/*브로드 캐스트 활성*/
+	BOOL opt = TRUE;
+	setsockopt(s,SOL_SOCKET,SO_BROADCAST,(char*)&opt,sizeof(opt));
+
+	/*데이터 송신*/
+	SOCKADDR_IN SRVaddr;
+	memset(&SRVaddr, 0, sizeof(SRVaddr));
+
+	SRVaddr.sin_addr.s_addr = inet_addr("192.168.91.255");
+	SRVaddr.sin_port = htons(12345);
+	SRVaddr.sin_family = AF_INET;
+
+	char sendbuf[1024];
+	memset(sendbuf,0,sizeof(sendbuf));
+
+	sprintf(sendbuf,"[질문] 자신이 선호하는 진로를 고르시오.\n1.프로그래머\n2.네트워크관리자\n3.시스템관리자\n4.보안관리자\n");
+
+	sendto(s,sendbuf,strlen(sendbuf),0,(SOCKADDR*)&SRVaddr,sizeof(SRVaddr));
+	
+	int result=0;
+	int errch=0;
+
+	int timeopt=10000;
+	setsockopt(s,SOL_SOCKET,SO_RCVTIMEO, (char*)&timeopt,sizeof(timeopt));
+
+	int data[5]={0,0,0,0,0};
+
+	while(1)
+	{
+		errch = recvfrom(s,(char*)&result,sizeof(result),0,NULL,0);
+		if(errch == SOCKET_ERROR)
+			break;
+		printf("%d\n", result);
+		data[result]++;
+	}
+	int i=1;
+
+	printf("################설문조사 결과#####################\n");
+	for(;i<5;i++)
+	{
+		printf("%d번 : %d명 \n", i, data[i]);
+	}
+	
+
+	/*소켓 종료*/
+	closesocket(s);
+
+	/*dll 언로드 */
+	WSACleanup();
+
+	return 0;
+}

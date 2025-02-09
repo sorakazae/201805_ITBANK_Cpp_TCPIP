@@ -1,0 +1,127 @@
+소문자를 입력 받아 대문자로 변환 출력하는 함수를 만드시오
+
+사칙연산 계산기 함수를 만드시오 (단 나누기는 실수 값으로 출력 하시오)
+int main(){
+	int su1, su2;
+	printf("첫번째 수 입력 : ");
+	scanf("%d",&su1);
+	printf("첫번째 수 입력 : ");
+	scanf("%d",&su2);
+
+	printf("%d + %d = %d\n",su1,su2,add_func(su1,su2));
+	printf("%d - %d = %d\n",su1,su2,sub_func(su1,su2));
+	printf("%d * %d = %d\n",su1,su2,mul_func(su1,su2));
+	printf("%d / %d = %.2f\n",su1,su2,div_func(su1,su2));
+	
+	return 0;
+}
+
+
+
+
+
+홍길동 18 경기도 국60 영70 수80 를 저장하고 출력하라
+#include <stdio.h>
+#include <string.h>
+struct score{
+	int kor;
+	int eng;
+	int math;
+};
+struct _name{
+	char name[20];
+};
+struct _addr{
+	char addr[50];
+};
+struct infor{
+	struct _name name;
+	struct _addr addr;
+	int age;
+};
+struct Student{
+	struct score s;
+	struct infor i;
+};
+
+int main(){
+	struct Student S;
+	return 0;
+}
+
+
+
+
+
+ip주소와 port를 저장해서 출력하라
+#include <stdio.h>
+#include <string.h>
+struct B{
+	union{
+		struct {int a[5];}A;
+		struct {char a[10], b[10];}B;
+		struct {short a[5],b[5];}C;
+		char addr[20]; //자신의 아이피주소 저장"192.168.0.42"
+	}UN;
+#define _addr UN.addr
+};
+
+struct A{
+	int port; // 12345 저장
+	struct B b;
+};
+int main(){
+	struct A a;
+	return 0;
+}
+
+
+
+
+
+#include <stdio.h>
+typedef struct{
+	int data1;
+	int data2;
+}Data1;
+
+int main(){
+	Data1 * p = (Data1 *)malloc(sizeof(Data1));
+	func1(&p); //func1 함수를 만들어서 func1 안에서 data1에 100을 넣으세요
+	func2(p); //func2 함수를 만들어서 func2 안에서 data2에 200을 넣으세요
+
+	//data1 과 data2 를 출력하세요.
+	//동적해제 코드를 추가하세요.
+	return 0;
+}
+
+
+
+
+
+#include <stdio.h>
+#include <malloc.h>
+
+typedef struct{
+	char name[20];
+	int score;
+}Element;
+
+typedef struct{
+	int data1;
+	int data2;
+	Element p;
+}Data1;
+
+int main(){
+	Data1 * p = (Data1*)malloc(sizeof(Data1));
+
+	printf("이름을 입력하세요 : ");
+	// scanf를 써서 name에 이름을 입력 받으세요
+	printf("점수를 입력하세요 : ");
+	// scanf를 써서 score에 점수를 입력 받으세요
+
+	//입력받은 값을 출력하세요.
+	//동적할당 해제
+	return 0;
+}

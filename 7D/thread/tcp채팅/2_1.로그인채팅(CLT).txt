@@ -1,0 +1,136 @@
+/*전처리기 구성*/
+#pragma comment(lib, "ws2_32.lib")
+#include <winsock2.h>
+#include <stdio.h>
+
+struct userInfo{
+	char userID[20];
+	char userPW[20];
+	int num;
+};
+void auth(SOCKET s);
+DWORD WINAPI sendFunc(LPVOID arg);
+DWORD WINAPI recvFunc(LPVOID arg);
+char buf[1024];
+
+int main(){
+	/* dll 로드 */
+	WSADATA wsa;
+	WSAStartup(MAKEWORD(2,2), &wsa);
+	
+	/*소켓 생성*/
+	SOCKET s;
+	s = socket(AF_INET, SOCK_STREAM, 0);
+	if(s == INVALID_SOCKET){
+		printf("socket error!\n");
+		return -1;
+	}
+	
+	char ip_[100];
+	printf("접속할 아이피 입력 : ");
+	scanf("%s",ip_);
+
+	SOCKADDR_IN SRVAddr;
+	memset(&SRVAddr, 0, sizeof(SRVAddr));
+	/*서버 아이피, 포트 주소 정보 입력 */
+	SRVAddr.sin_addr.s_addr = inet_addr(ip_);
+	SRVAddr.sin_port = htons(12345);
+	SRVAddr.sin_family = AF_INET;
+	
+	int errch = 0;
+	errch = connect(s,(SOCKADDR *)&SRVAddr, sizeof(SRVAddr));
+	if(errch == SOCKET_ERROR){
+		printf("connect error!\n");
+		return -1;
+	}
+	
+	auth(s);
+	
+	HANDLE sndThread, rcvThread;
+	sndThread = CreateThread(NULL,0, sendFunc,(LPVOID)&s,0,NULL);
+	rcvThread = CreateThread(NULL,0, recvFunc,(LPVOID)&s,0,NULL);
+	
+	WaitForSingleObject(sndThread,INFINITE);
+	WaitForSingleObject(rcvThread,INFINITE);
+	
+	/*소켓 종료*/
+	closesocket(s);
+	/*dll 언로드 */
+	WSACleanup();
+	
+	return 0;
+}
+
+DWORD WINAPI sendFunc(LPVOID arg){
+	SOCKET SNDs = *((SOCKET*)arg);
+	char sendbuf[1460];
+	memset(sendbuf, 0, sizeof(sendbuf));
+	
+	while(1){
+		if(gets(sendbuf) == NULL){
+			closesocket(SNDs);
+			exit(0);
+		}
+		send(SNDs,sendbuf,strlen(sendbuf),0);
+	}
+	return 0;
+}
+
+DWORD WINAPI recvFunc(LPVOID arg){
+	SOCKET RCVs = *((SOCKET*)arg);
+	char recvbuf[1460];
+	memset(recvbuf,0,sizeof(recvbuf));
+	int check=0;
+	
+	while(1){
+		check = recv(RCVs, recvbuf, sizeof(recvbuf),0);
+		if(check == SOCKET_ERROR){
+			return -1;
+		}
+		
+		puts(recvbuf);
+		memset(recvbuf,0,sizeof(recvbuf));
+	}
+	return 0;
+}
+void auth(SOCKET s){
+	
+	struct userInfo user={0};
+	int result=0;
+	while(1){
+		printf("1.로그인\n");
+		printf("2.회원가입\n");
+		printf(">>> ");
+		scanf("%d",&user.num);
+		switch(user.num){
+		case 2:
+			printf("등록할 id 입력 : ");
+			scanf("%s",user.userID);
+			printf("등록할 pw 입력 : ");
+			scanf("%s",user.userPW);
+			send(s,(char*)&user,sizeof(user),0);
+			printf("성공적으로 등록 되었습니다!!!\n");
+			break;
+		case 1:
+			printf("로그인 id 입력 : ");
+			scanf("%s",user.userID);
+			printf("로그인 pw 입력 : ");
+			scanf("%s",user.userPW);
+			send(s,(char*)&user,sizeof(user),0);
+			recv(s,(char*)&user,sizeof(user),0);
+			if(user.num==0){
+				printf("로그인 성공!!!\n");
+				printf("\n채팅 가능 합니다!!!\n");
+				return;
+			}else if(user.num == -1){
+				printf("존재 하지 않은 id 입니다\n");
+			}else if(user.num == 1){
+				printf("비밀번호 오류 입니다\n");
+			}
+			break;
+		default:printf("잘못 입력\n");
+		}
+	}
+	
+	
+}

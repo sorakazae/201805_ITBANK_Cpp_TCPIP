@@ -1,0 +1,33 @@
+#include <stdio.h>
+
+int add_func(int su1, int su2)
+{
+	return su1+su2;	
+}
+int sub_func(int su1, int su2)
+{
+	return su1-su2;	
+}
+int mul_func(int su1, int su2)
+{
+	return su1*su2;	
+}
+float div_func(int su1, int su2)
+{
+	return (float)su1/su2;	
+}
+int main()
+{
+	int su1,su2;
+	printf("첫번째 수 입력 : ");
+	scanf("%d",&su1);
+	printf("두번째 수 입력 : ");
+	scanf("%d",&su2);
+	
+	printf("%d + %d = %d \n",su1,su2,add_func(su1,su2));
+	printf("%d - %d = %d \n",su1,su2,sub_func(su1,su2));
+	printf("%d * %d = %d \n",su1,su2,mul_func(su1,su2));
+	printf("%d / %d = %f \n",su1,su2,div_func(su1,su2));
+	
+	return 0;
+}

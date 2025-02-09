@@ -1,0 +1,26 @@
+#include <stdio.h>
+#include <conio.h>
+#define ESC	0x1b
+
+void convert(char * ch){
+
+	if(*ch >= 'a' && *ch <= 'z')
+	{
+		*ch-=32;
+	}
+
+}
+int main(){
+	char ch;
+
+	while(1){
+	ch = getch();
+	if(ch == ESC)
+		break;
+
+	convert(&ch);
+	putch(ch);
+	printf("\n");
+	}
+	return 0;
+}

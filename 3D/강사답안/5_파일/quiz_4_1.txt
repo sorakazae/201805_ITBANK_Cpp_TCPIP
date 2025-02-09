@@ -1,0 +1,14 @@
+typedef struct st{
+	char name[20]; //이름
+	char addr[50]; //주소
+	int age; //나이
+}ST;
+//함수 내용
+//func함수 지역에서 동적할당하여 각각의 공간에 값을 저장하세요
+int main(){
+	ST * p;
+	p=func();
+	//p변수를 이용해서 파일에 출력 후 파일닫기
+	//동적할당 해제
+	return 0;
+}

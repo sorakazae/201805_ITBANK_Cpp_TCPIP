@@ -1,0 +1,70 @@
+#pragma comment(lib,"ws2_32.lib")
+#include <winsock2.h>
+#include <stdio.h>
+
+int main()
+{
+	/*윈속 생성*/
+	WSADATA wsa;
+	WSAStartup(MAKEWORD(2,2),&wsa);
+
+	/*소켓 생성*/
+	SOCKET UDPc;
+	UDPc=socket(AF_INET, SOCK_DGRAM,0);
+	if(UDPc == INVALID_SOCKET){
+		printf("SOCKET ERROR!!\n");
+		return -1;
+	}
+	/*통신할 대상의 주소 구조체*/
+	SOCKADDR_IN sendAddr;
+	sendAddr.sin_addr.s_addr = inet_addr("192.168.222.129");
+	sendAddr.sin_port = htons(22222);
+	sendAddr.sin_family = AF_INET;
+	
+	char path[256];
+	memset(path,0,sizeof(path));
+	printf("input path : ");
+	scanf("%s",path);
+sendto(UDPc,path,sizeof(path),0,(sockaddr*)(&sendAddr),sizeof(sendAddr));
+
+	SOCKADDR_IN recvAddr;
+	memset((char*)&recvAddr,0,sizeof(recvAddr));
+	int recvLen = sizeof(recvAddr);
+
+	/*데이터 수신*/
+	int datasize=0;
+	recvfrom(UDPc,(char*)&datasize,sizeof(datasize),0,(sockaddr*)(&recvAddr),&recvLen);
+	printf("datasize : %d\n",datasize);
+	char * recvBuf= (char*)malloc(datasize);
+	memset(recvBuf,0,datasize);
+
+/*대용량 파일로 인해 반복문 구성*/
+	char buf[1024];
+	memset(buf,0,sizeof(buf));
+	int totalbuf=0;
+	int recvSize=0;
+
+	while(1){
+recvSize = recvfrom(UDPc,buf,sizeof(buf),0,(sockaddr*)(&recvAddr),&recvLen);
+		if(recvSize==0)
+			break;
+		printf("수신 : %d\n", recvSize);
+		memcpy(&recvBuf[totalbuf],buf,recvSize);
+			totalbuf+=recvSize;
+	}
+
+	FILE *fp;
+	fp=fopen("C:\\download.jpg", "wb");
+	fwrite(recvBuf,datasize,1,fp);
+	fclose(fp);
+	
+
+
+	/*소켓 종료*/
+	closesocket(UDPc);
+
+	/*윈속 종료*/
+	WSACleanup();
+
+	return 0;
+}

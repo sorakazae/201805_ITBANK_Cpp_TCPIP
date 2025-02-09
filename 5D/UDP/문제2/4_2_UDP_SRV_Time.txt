@@ -1,0 +1,63 @@
+#pragma comment(lib,"ws2_32.lib")
+#include <winsock2.h>
+#include <stdio.h>
+#include <time.h>
+
+int main(){
+
+	/*윈속 시작*/
+	WSADATA wsa;
+	WSAStartup(MAKEWORD(2,2), &wsa);
+
+	/*소켓 생성*/
+	SOCKET UDPs;
+	UDPs = socket(AF_INET,SOCK_DGRAM,0);
+	if(UDPs == INVALID_SOCKET){
+		printf("SOCKET ERROR!!\n");
+		return -1;
+	}
+
+	/*서버 주소 구조체*/
+	SOCKADDR_IN SRVAddr;
+	SRVAddr.sin_family = AF_INET;
+	SRVAddr.sin_port = htons(22222);
+	SRVAddr.sin_addr.s_addr = inet_addr("192.168.222.129");
+
+
+	/*주소 결합*/
+	int error=0;
+	error=bind(UDPs,(sockaddr *)(&SRVAddr),sizeof(SRVAddr));
+	if(error == SOCKET_ERROR){
+		printf("BIND ERROR!!\n");
+		return -1;
+	}
+	
+	SOCKADDR_IN CLTaddr;
+	int CLTlen = sizeof(CLTaddr);
+	memset((char*)&CLTaddr,0,sizeof(CLTaddr));
+
+	char msg[256];
+	memset(msg,0,sizeof(msg));
+
+	recvfrom(UDPs,msg,sizeof(msg),0,(SOCKADDR*)&CLTaddr, &CLTlen);
+
+	time_t tm;
+	time(&tm);
+	struct tm * lt= localtime(&tm);
+	char time[512];
+	memset(time,0, sizeof(time));
+
+	sprintf(time,"오늘은 %d년 %d월 %d일 현재시각은 %d시 %d분입니다. \n",
+	lt->tm_year+1900, lt->tm_mon+1, lt->tm_mday,lt->tm_hour, lt->tm_min);
+
+	sendto(UDPs,time,strlen(time),0,(SOCKADDR*)&CLTaddr, CLTlen);
+
+
+
+	/*소켓 종료*/
+	closesocket(UDPs);
+
+	/*윈속 종료*/
+	WSACleanup();
+	return 0;
+}

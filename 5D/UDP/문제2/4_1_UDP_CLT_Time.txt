@@ -1,0 +1,45 @@
+#pragma comment(lib,"ws2_32.lib")
+#include <winsock2.h>
+#include <stdio.h>
+
+int main()
+{
+	/*윈속 생성*/
+	WSADATA wsa;
+	WSAStartup(MAKEWORD(2,2),&wsa);
+
+	/*소켓 생성*/
+	SOCKET UDPc;
+	UDPc=socket(AF_INET, SOCK_DGRAM,0);
+	if(UDPc == INVALID_SOCKET){
+		printf("SOCKET ERROR!!\n");
+		return -1;
+	}
+	/*통신할 대상의 주소 구조체*/
+	SOCKADDR_IN sendAddr;
+	sendAddr.sin_addr.s_addr = inet_addr("192.168.222.129");
+	sendAddr.sin_port = htons(22222);
+	sendAddr.sin_family = AF_INET;
+
+	char msg[256]="시간을 줄래요!!";
+	sendto(UDPc, msg, strlen(msg),0,(SOCKADDR*)&sendAddr,sizeof(sendAddr));
+
+	char time[512];
+	memset(time,0,sizeof(time));
+	
+	SOCKADDR_IN recvAddr;
+	int recvLen = sizeof(recvAddr);
+	memset((char*)&recvAddr, 0, recvLen);
+
+	recvfrom(UDPc,time,sizeof(time),0,(SOCKADDR*)&recvAddr,&recvLen);
+
+	printf("%s\n", time);
+
+	/*소켓 종료*/
+	closesocket(UDPc);
+
+	/*윈속 종료*/
+	WSACleanup();
+
+	return 0;
+}

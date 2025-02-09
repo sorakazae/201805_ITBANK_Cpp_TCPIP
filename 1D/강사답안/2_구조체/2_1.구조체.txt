@@ -1,0 +1,25 @@
+#include <stdio.h> 
+
+struct A{
+	int a; //40 
+	int b; //30
+};
+struct B{
+	int b; //20
+	struct A a;
+};
+struct C{
+	struct B b;
+	struct A a;
+	int c; //10  
+};
+
+int main(){
+	struct C c;
+	c.c=10; c.b.b=20; c.a.a=40; c.a.b=30;
+	c.b.a.a=40; c.b.a.b=30;
+
+	printf("%d : %d : %d : %d : %d : %d\n",c.c,c.b.b,
+		c.a.a,c.a.b,c.b.a.a,c.b.a.b);
+	return 0;
+}

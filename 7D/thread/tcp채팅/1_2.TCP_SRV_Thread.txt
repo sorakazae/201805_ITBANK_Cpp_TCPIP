@@ -1,0 +1,89 @@
+#pragma comment(lib, "ws2_32.lib")
+#include <winsock2.h>
+#include <stdio.h>
+
+SOCKET totSock[256];
+int sockCnt=0;
+DWORD __stdcall func(LPVOID arg);
+SOCKADDR_IN CLTaddr;
+
+int main(){
+	WSADATA wsa;
+	
+	/* 윈속 dll 로드*/ 
+	WSAStartup( MAKEWORD(2,2) ,&wsa);
+	
+	/* 소켓 생성*/
+	SOCKET s;
+	s = socket(AF_INET, SOCK_STREAM,0);
+	if(s == INVALID_SOCKET){
+		printf("socket error!\n");
+		return -1;
+	}
+	
+	/*주소 결합*/
+	SOCKADDR_IN SRVaddr;
+	memset(&SRVaddr, 0, sizeof(SRVaddr));
+	
+	SRVaddr.sin_family = AF_INET;
+	SRVaddr.sin_port = htons(12345);
+	SRVaddr.sin_addr.s_addr = inet_addr("192.168.91.140");
+	
+	int errch = 0;
+	errch = bind(s, (SOCKADDR*)&SRVaddr, sizeof(SRVaddr));
+	if(errch == SOCKET_ERROR){
+		printf("bind error!\n");
+		return -1;
+	}
+	
+	/*포트 오픈*/
+	errch = listen(s,SOMAXCONN);
+	if(errch == SOCKET_ERROR){
+		printf("listen error!\n");
+		return -1;
+	}
+	
+	/*연결 허용*/
+	SOCKET CLTs;
+	int size = sizeof(CLTaddr);
+	HANDLE hThread;
+
+	while(1){
+		CLTs = accept(s, (SOCKADDR * )&CLTaddr, &size);
+		if(CLTs == INVALID_SOCKET){
+			printf("accept error!\n");
+			return -1;
+		}
+	
+		totSock[sockCnt++] = CLTs;
+		hThread = CreateThread(NULL, 0, func, (LPVOID)&CLTs, 0, NULL);	
+	}
+	
+	/*소켓 종료 및 dll 언로드*/
+	closesocket(CLTs);
+	closesocket(s);
+	WSACleanup();
+	return 0;
+}
+
+DWORD __stdcall func(LPVOID arg)
+{
+	SOCKET CLTS = *( (SOCKET *)arg);
+	int recvlen = 0, i;
+	char recvbuf[1460];
+	memset(recvbuf,0,sizeof(recvbuf));
+
+	while(1){
+		recvlen = recv(CLTS, recvbuf, sizeof(recvbuf),0);
+		
+		if(recvlen == 0)
+			break;
+	
+		for(i=0; i<sockCnt; i++)
+		send(totSock[i], recvbuf, recvlen,0);
+
+		memset(recvbuf,0,sizeof(recvbuf));
+	}
+	
+	return 0;
+}

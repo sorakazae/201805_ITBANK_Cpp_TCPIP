@@ -1,0 +1,83 @@
+/*전처리기 구성*/
+#pragma comment(lib, "ws2_32.lib")
+#include <winsock2.h>
+#include <stdio.h>
+
+DWORD WINAPI sendFunc(LPVOID arg);
+DWORD WINAPI recvFunc(LPVOID arg);
+char buf[1024];
+
+int main(){
+	/* dll 로드 */
+	WSADATA wsa;
+	WSAStartup(MAKEWORD(2,2), &wsa);
+
+	/*소켓 생성*/
+	SOCKET s;
+	s = socket(AF_INET, SOCK_STREAM, 0);
+	if(s == INVALID_SOCKET){
+		printf("socket error!\n");
+		return -1;
+	}
+
+	SOCKADDR_IN SRVAddr;
+	memset(&SRVAddr, 0, sizeof(SRVAddr));
+	/*서버 아이피, 포트 주소 정보 입력 */
+	SRVAddr.sin_addr.s_addr = inet_addr("192.168.91.140");
+	SRVAddr.sin_port = htons(12345);
+	SRVAddr.sin_family = AF_INET;
+
+	int errch = 0;
+	errch = connect(s,(SOCKADDR *)&SRVAddr, sizeof(SRVAddr));
+	if(errch == SOCKET_ERROR){
+		printf("connect error!\n");
+		return -1;
+	}
+	
+	HANDLE sndThread, rcvThread;
+	sndThread = CreateThread(NULL,0, sendFunc,(LPVOID)&s,0,NULL);
+	rcvThread = CreateThread(NULL,0, recvFunc,(LPVOID)&s,0,NULL);
+
+	WaitForSingleObject(sndThread,INFINITE);
+	WaitForSingleObject(rcvThread,INFINITE);
+
+	/*소켓 종료*/
+	closesocket(s);
+	/*dll 언로드 */
+	WSACleanup();
+
+	return 0;
+}
+
+DWORD WINAPI sendFunc(LPVOID arg){
+	SOCKET SNDs = *((SOCKET*)arg);
+	char sendbuf[1460];
+	memset(sendbuf, 0, sizeof(sendbuf));
+	
+	while(1){
+		if(gets(sendbuf) == NULL){
+			closesocket(SNDs);
+			exit(0);
+		}
+		send(SNDs,sendbuf,strlen(sendbuf),0);
+	}
+	return 0;
+}
+
+DWORD WINAPI recvFunc(LPVOID arg){
+	SOCKET RCVs = *((SOCKET*)arg);
+	char recvbuf[1460];
+	memset(recvbuf,0,sizeof(recvbuf));
+	int check=0;
+
+	while(1){
+		check = recv(RCVs, recvbuf, sizeof(recvbuf),0);
+		if(check == SOCKET_ERROR){
+			return -1;
+		}
+
+		puts(recvbuf);
+		memset(recvbuf,0,sizeof(recvbuf));
+	}
+	return 0;
+}

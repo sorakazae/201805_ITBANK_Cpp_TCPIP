@@ -1,0 +1,44 @@
+//#pragma comment(lib,"ws2_32")
+#include<winsock2.h>
+#include<stdio.h>
+typedef struct u{
+	int num;
+	char str[1024];
+}ST;
+int main(){
+	WSADATA wsa;
+	WSAStartup(MAKEWORD(2,2),&wsa);
+	SOCKET s;
+	s = socket(AF_INET,SOCK_STREAM,0);
+	if(s == INVALID_SOCKET){
+		printf("socket_error!!!!");
+		return -1;
+	}
+	SOCKADDR_IN addr;
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(12345);
+	addr.sin_addr.s_addr = inet_addr("192.168.1.144");
+
+	int error = connect(s,(sockaddr*)&addr,sizeof(addr));
+	if(error == SOCKET_ERROR){
+		printf("connect_error!!!!");
+		return -1;
+	}
+	char buf[500];
+	int user;
+	ST st;
+	while(1){
+		memset(&st,0,sizeof(st));
+		printf("보낼 데이터 입력 : ");
+		scanf("%d",&user);
+		int len = send(s,(char*)&user,sizeof(user),0);
+		recv(s,(char*)&st,sizeof(st),0);		
+		printf("%s\n",st.str);
+		if(st.num == 1)
+			break;
+		
+	}
+	closesocket(s);
+	WSACleanup();
+	return 0;
+}

@@ -1,0 +1,52 @@
+/*傈贸府扁 备己*/
+#pragma comment(lib, "ws2_32.lib")
+#include <winsock2.h>
+#include <stdio.h>
+
+int main(){
+	/* dll 肺靛 */
+	WSADATA wsa;
+	WSAStartup(MAKEWORD(2,2), &wsa);
+
+	/*家南 积己*/
+	SOCKET s;
+	s = socket(AF_INET, SOCK_DGRAM, 0);
+	if(s == INVALID_SOCKET){
+		printf("socket error!\n");
+		return -1;
+	}
+
+	/*单捞磐 价脚*/
+	SOCKADDR_IN SRVaddr;
+	memset(&SRVaddr, 0, sizeof(SRVaddr));
+
+	SRVaddr.sin_addr.s_addr = inet_addr("192.168.91.132");
+	SRVaddr.sin_port = htons(12345);
+	SRVaddr.sin_family = AF_INET;
+
+	FILE * fp;
+	fp = fopen("c:\\Data.txt", "rb");
+	fseek(fp,0,SEEK_END);
+	int fsize = ftell(fp);
+
+	char * sendbuf = (char*)malloc(fsize);
+	memset(sendbuf, 0, fsize);
+
+	fseek(fp, 0 , SEEK_SET);
+	fread(sendbuf,1,fsize,fp);
+	fclose(fp);
+
+	int sendsize=0;
+	sendsize = sendto(s,sendbuf,fsize,0,
+		(SOCKADDR*)&SRVaddr,sizeof(SRVaddr));
+	
+	printf("价脚 单捞磐 农扁 : %d\n", sendsize);
+
+	/*家南 辆丰*/
+	closesocket(s);
+
+	/*dll 攫肺靛 */
+	WSACleanup();
+
+	return 0;
+}

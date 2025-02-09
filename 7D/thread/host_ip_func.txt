@@ -1,0 +1,53 @@
+/*전처리기 구성*/
+#pragma comment(lib, "ws2_32.lib")
+#include <winsock2.h>
+#include <stdio.h>
+
+int main(){
+	/* dll 로드 */
+	WSADATA wsa;
+	struct hostent * hp;
+	char host[1024];
+	SOCKET s;
+
+	WSAStartup(MAKEWORD(2,2), &wsa);
+	
+	s = socket(AF_INET, SOCK_DGRAM, 0);
+	if(s == INVALID_SOCKET){
+		printf("socket error!\n");
+		return -1;
+	}
+
+	//호스트 이름 얻어오는 함수
+	gethostname(host,sizeof(host));
+	printf("host : %s\n",host);
+	//호스트 정보 얻어오는 함수
+	hp = gethostbyname(host);
+	printf("host_name : %s\n",hp->h_name);
+	//별칭
+	for(int i=0;hp->h_aliases[i] !=NULL;i++)
+		printf("hp->h_aliases[%d] : %s\n",hp->h_aliases[i]);
+	
+	switch(hp->h_addrtype)//버전정보
+	{
+	case AF_INET:printf("ipv4\n");break;
+	case AF_INET6:printf("ipv6\n");break;
+	}
+	
+	if(hp->h_length == 4)//ipv4는 4byte
+		printf("ipv4사용\n");
+	else if(hp->h_length == 16)//ipv6는 16byte사용
+		printf("ipv6사용\n");
+	
+	//한 컴퓨터에서 여러 ip를 할당 받을수 있다 이를 모두 출력한다
+	for( i=0;hp->h_addr_list[i] != NULL;i++)
+		printf("hp->h_addr_list[%d] = %s\n",i,inet_ntoa(*(struct in_addr*)hp->h_addr_list[i]));
+
+	/*소켓 종료*/
+	closesocket(s);
+
+	/*dll 언로드 */
+	WSACleanup();
+
+	return 0;
+}

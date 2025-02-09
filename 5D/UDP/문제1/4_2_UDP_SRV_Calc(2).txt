@@ -1,0 +1,49 @@
+#pragma comment(lib, "ws2_32.lib")
+#include <winsock2.h>
+#include <stdio.h>
+struct test{
+	int num_1;
+	char op;
+	int num_2;
+};
+int main()
+{
+	WSADATA wsa;
+	WSAStartup(MAKEWORD(2,2),&wsa);
+	SOCKET s;
+	s = socket(AF_INET,SOCK_DGRAM,0);
+	if( s == INVALID_SOCKET){
+		printf("sokcet_error!!!!");
+		return -1;
+	}
+	SOCKADDR_IN addr;
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(12345);
+	addr.sin_addr.s_addr = inet_addr("192.168.10.128");
+
+	int error;
+	error = bind(s,(sockaddr*)&addr,sizeof(addr));
+	if(error == SOCKET_ERROR) return -1;
+	
+	char buf[1024]={0};
+	SOCKADDR_IN clt_addr;
+	int len = sizeof(clt_addr);
+	 
+	struct test a;
+
+
+	recvfrom(s,(char*)&a,sizeof(a),0,(sockaddr*)&clt_addr,&len);
+	if(a.op == '+')
+		sprintf(buf,"%d",a.num_1+a.num_2);
+	if(a.op == '-')
+		sprintf(buf,"%d",a.num_1-a.num_2);
+	if(a.op == '*')
+		sprintf(buf,"%d",a.num_1*a.num_2);
+	if(a.op == '/')
+		sprintf(buf,"%d",a.num_1/a.num_2);
+	sendto(s,buf,sizeof(buf),0,(sockaddr*)&clt_addr,sizeof(clt_addr));
+
+	closesocket(s);
+	WSACleanup();
+	return 0;
+}

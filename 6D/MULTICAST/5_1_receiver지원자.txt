@@ -1,0 +1,84 @@
+#pragma comment(lib,"ws2_32.lib")
+#include <winsock2.h>
+#include <stdio.h>
+#include <ws2tcpip.h>
+#include < io.h >
+
+typedef struct info{
+	char name[100];
+	char addr[100];
+	char money[100];
+}INFO;
+
+int main()
+{
+	WSADATA wsa;
+	WSAStartup(MAKEWORD(2,2), &wsa);
+	SOCKET s;
+	s = socket(AF_INET,SOCK_DGRAM,0);
+	if(s == INVALID_SOCKET){
+		printf("SOCKET ERROR!!\n");
+		return -1;
+	}
+
+	struct hostent * hp;
+	char host[1024];
+	char ip_[100]={0};
+	gethostname(host,sizeof(host));
+	hp = gethostbyname(host);
+	printf("hp->h_addr_list[0] = %s\n",inet_ntoa(*(struct in_addr*)hp->h_addr_list[0]));
+	sprintf(ip_,"%s",inet_ntoa(*(struct in_addr*)hp->h_addr_list[0]));
+
+	SOCKADDR_IN SRVAddr;
+	SRVAddr.sin_family = AF_INET;
+	SRVAddr.sin_port = htons(22222);
+	SRVAddr.sin_addr.s_addr = inet_addr(ip_);
+
+	int error=0;
+	error=bind(s,(sockaddr *)(&SRVAddr),sizeof(SRVAddr));
+	if(error == SOCKET_ERROR){
+		printf("BIND ERROR!!\n");
+		return -1;
+	}
+	struct ip_mreq mr;
+	mr.imr_interface.s_addr = inet_addr(ip_);
+	mr.imr_multiaddr.s_addr = inet_addr("233.3.3.3");
+
+	setsockopt(s,IPPROTO_IP,IP_ADD_MEMBERSHIP,(char*)&mr,sizeof(mr));
+
+	SOCKADDR_IN recvAddr;
+	int recvLen = sizeof(recvAddr);
+
+	char message[100]={0};
+	error=recvfrom(s,message,sizeof(message),0,(sockaddr*)(&recvAddr),&recvLen);
+	if(error == SOCKET_ERROR){
+		printf("RECVFROM ERROR!!\n");
+		return -1;
+	}
+
+	INFO peinfo={0};
+	printf(message);
+	printf("\n이름 : ");
+	scanf("%s",peinfo.name);
+	printf("지원 동기 : ");
+	fflush(stdin);
+	gets(peinfo.addr);
+	fflush(stdin);
+	printf("희망 연봉 : ");
+	scanf("%s",peinfo.money);
+	printf("참여 해 주셔서 감사합니다!!!!\n");
+
+error=sendto(s,(char*)&peinfo,sizeof(peinfo),0,(sockaddr*)(&recvAddr),recvLen);
+	if(error == SOCKET_ERROR){
+		printf("SENDTO ERROR!!\n");
+		return -1;
+	}
+
+	/*멀티캐스트 그룹 탈퇴*/
+	setsockopt(s,IPPROTO_IP,IP_DROP_MEMBERSHIP,(char*)&mr, sizeof(mr));
+
+	closesocket(s);
+	WSACleanup();
+	return 0;
+
+}

@@ -1,0 +1,50 @@
+/*전처리기 구성*/
+#pragma comment(lib, "ws2_32.lib")
+#include <winsock2.h>
+#include <stdio.h>
+
+int main(){
+	/* dll 로드 */
+	WSADATA wsa;
+	WSAStartup(MAKEWORD(2,2), &wsa);
+
+	/*소켓 생성*/
+	SOCKET s;
+	s = socket(AF_INET, SOCK_DGRAM, 0);
+	if(s == INVALID_SOCKET){
+		printf("socket error!\n");
+		return -1;
+	}
+
+	/*브로드 캐스트 활성*/
+	BOOL opt = TRUE;
+	setsockopt(s,SOL_SOCKET,SO_BROADCAST,(char*)&opt,sizeof(opt));
+
+	/*데이터 송신*/
+	SOCKADDR_IN SRVaddr;
+	memset(&SRVaddr, 0, sizeof(SRVaddr));
+
+	SRVaddr.sin_addr.s_addr = inet_addr("192.168.91.255");
+	SRVaddr.sin_port = htons(12345);
+	SRVaddr.sin_family = AF_INET;
+
+	char sendbuf[1024];
+	memset(sendbuf,0,sizeof(sendbuf));
+
+	printf("input data : ");
+	scanf("%s", sendbuf);
+
+	int sendsize=0;
+	sendsize = sendto(s,sendbuf,strlen(sendbuf),0,
+		(SOCKADDR*)&SRVaddr,sizeof(SRVaddr));
+	
+	printf("송신 데이터 크기 : %d\n", sendsize);
+
+	/*소켓 종료*/
+	closesocket(s);
+
+	/*dll 언로드 */
+	WSACleanup();
+
+	return 0;
+}
